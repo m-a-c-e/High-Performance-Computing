@@ -15,5 +15,8 @@ nqueen: main.o solver.o utils.o
 %.o: %.cpp
 	$(CXX) $(CCFLAGS) -c $<
 
+run:
+	mpirun -np 1 ./nqueen 5 4 0
+
 clean:
 	rm -f *.o nqueen

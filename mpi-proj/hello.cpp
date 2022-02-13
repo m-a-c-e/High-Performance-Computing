@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::vector <std::vector <int> > solns;
-    nqueen_master(4, 4, true, &solns);
+    nqueen_master(5, 4, true, &solns);
     print_2D_vector(solns);
 
     // finalize MPI

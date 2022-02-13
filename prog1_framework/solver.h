@@ -12,6 +12,11 @@
 
 
 
+// helper functions
+bool is_valid(std::vector <int> arr);
+void print_2D_vector(std::vector <std::vector <int>> solns);
+void solve_nqueens( std::vector <int> arr, std::vector<std::vector<int> >& solns, bool exit_on_first);
+
 /************ Sequential solving function for nqueen*****************
  *
  * Takes the board size as input and creates all solutions to the n-queen problem. All solutions are put in the vector all_solns. Each solution is a vector of length n. Position i in a solution represents the row number of queen in column i. Columns and rows are numbered from 0 to n-1.
@@ -22,7 +27,7 @@
  * all_solns: A vector of all solutions, each solution being an n sized vector.
  *
  * *****************************************************************/
-void seq_solver(unsigned int n, unsigned int exit_on_first, std::vector<std::vector<unsigned int> >& all_solns);
+void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std::vector<std::vector<int> >& all_solns);
 
 
 
@@ -43,7 +48,7 @@ void seq_solver(unsigned int n, unsigned int exit_on_first, std::vector<std::vec
 void nqueen_master( unsigned int n,
                     unsigned int k,
                     unsigned int exit_on_first,
-                    std::vector<std::vector<unsigned int> >& all_solns);
+                    std::vector<std::vector<int> >& all_solns);
 
 
 

@@ -11,11 +11,8 @@ def is_valid(arr):
         return True
 
     idx = idx_minus_1 - 1 
-
-    
     for i in range(0, idx):
         if arr[i] == arr[idx] or (abs(arr[i] - arr[idx]) == abs(i - idx)):
-            print("i = ", i, " arr[i] = ", arr[i], " idx = ", idx)
             return False
     return True
 
@@ -23,7 +20,7 @@ def is_valid(arr):
 def get_partial_sol_list(size, depth):
     n = size        # size of board (rows)
     k = depth       # k > 1 --> other wise solution is trivial 
-                    # k <= n --> solution not possible    
+                    # k >= n --> solution not possible    
 
     arr         = [-1] * n
     start_value = 0
@@ -39,8 +36,6 @@ def get_partial_sol_list(size, depth):
                 start_value = 0
                 flag        = True
                 if i == k - 1:
-                    # a partial solution of size k is created here
-                    # send it to any worker here
                     partial_sol.append(copy.deepcopy(arr))
                     flag = False
                 break
@@ -55,7 +50,6 @@ def get_partial_sol_list(size, depth):
 
     return partial_sol
 
-ans = get_partial_sol_list(size=5, depth=4)
-#ans = is_valid([1, 2, 3, -1])
+ans = get_partial_sol_list(size=8, depth=4)
 print(ans)
 print(len(ans))

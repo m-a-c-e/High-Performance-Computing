@@ -38,7 +38,7 @@ bool input_sanity_check(std::ostringstream& err_msg, int argc, char **argv) {
 void write_output(  std::ostream& os,
                     double time_elapsed,
                     unsigned int exit_on_first,
-                    std::vector<std::vector<unsigned int> >& solns) {
+                    std::vector<std::vector<int> >& solns) {
 
     if (exit_on_first) {
       os << "-1" << std::endl;

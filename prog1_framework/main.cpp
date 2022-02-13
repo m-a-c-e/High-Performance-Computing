@@ -20,6 +20,8 @@ int main(int argc, char **argv) {
     // total number of procs in the world
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+    printf("rank = %d, processes = %d\n", proc_id, num_procs);
+
     // the board size and the size of partial soln to be computed by master
     unsigned int n,k,e;
 
@@ -44,13 +46,20 @@ int main(int argc, char **argv) {
     MPI_Bcast(&e, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 
     // vector containing solutions
-    std::vector<std::vector<unsigned int> > solns;
+    std::vector< std::vector <int> > solns;
+    std::vector< std::vector <int> > new_solns;
 
     double time_elapsed=0.0;
     time_elapsed -= MPI_Wtime();
 
     if (num_procs==1) {
-        seq_solver(n, e, solns);
+        // seq_solver(n, k, e, solns);
+        // std::vector <int> arr = {1, 3, -1, -1};
+        // solve_nqueens(arr, new_solns, false);
+        // print_2D_vector(solns);
+        // print_2D_vector(new_solns);
+        nqueen_master(n, k, false, solns);
+        print_2D_vector(solns);
     }
     else {
 
