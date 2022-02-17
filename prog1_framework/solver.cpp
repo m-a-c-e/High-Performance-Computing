@@ -69,16 +69,17 @@ void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std:
         while(start_value < (int)n) {
             arr[i] = start_value;
             if(is_valid(arr, i)) {
-                start_value = 0;
-                flag        = true;
                 if (i == (int)k - 1) {
                     // a partial solution of size k is created here
                     solns.push_back(arr);
+                    start_value ++;
+                    continue;
                     if (exit_on_first) {
                         return;
                     }
-                    flag = false;
                 }
+                start_value = 0;
+                flag = true;
                 break;
             } else {
                 start_value ++;
@@ -97,9 +98,9 @@ void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std:
 
 void solve_nqueens( std::vector <unsigned int> arr,
                     std::vector<std::vector<unsigned int> >& solns,
-                    bool exit_on_first, int idx, int start_value) {
+                    bool exit_on_first, int idx) {
     /*
-        idx -> solved till this index
+        idx -> start from this index
     */
 
     // get all the solutions resulting from this partial solutions
@@ -107,23 +108,25 @@ void solve_nqueens( std::vector <unsigned int> arr,
     bool flag       = false;
     int i           = idx;
     int n           = (int)arr.size();
+    int start_value = 0;
 
     while(i < (int)n && i >= idx) {
         flag = false;
         while(start_value < (int)n) {
             arr[i] = start_value;
             if(is_valid(arr, i)) {
-                start_value = 0;
-                flag        = true;
                 if (i == (int)n - 1) {
                     // a partial solution of size k is created here
                     // send it to an idle worker
                     solns.push_back(arr);
+                    start_value ++;
+                    continue;
                     if (exit_on_first) {
                         return;
                     }
-                    flag = false;
                 }
+                start_value = 0;
+                flag = true;
                 break;
             } else {
                 start_value ++;
@@ -133,7 +136,8 @@ void solve_nqueens( std::vector <unsigned int> arr,
             i ++;
             continue;
         }
-        arr[i] = -1;
+        // arr[i] = -1;
+        arr[i] = 0;
         i      = i - 1;
         start_value = arr[i] + 1;
     }
@@ -166,41 +170,70 @@ void nqueen_master( unsigned int n,
 
     seq_solver(n, k, 0, partial_solns);
 
-    printf("ultimate size = %lu\n", partial_solns.size());
-
-//    MPI_Request req;
-//    int flag;
-
     int num_procs;
     MPI_Status stat;
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-    std::vector <unsigned int> ans(n, n);
+    std::vector <unsigned int> dummy(n, n);
 
-    // Send the partial solutions initially
-    while(!partial_solns.empty()) {
-        // check which processor is ready
-        MPI_Send(&partial_solns[partial_solns.size() - 1][0], n, MPI_UNSIGNED, 1, SEND_TAG, MPI_COMM_WORLD);
-        partial_solns.pop_back();
-
-        // check if you can receive anything
-        MPI_Recv(&ans[0], n, MPI_UNSIGNED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-
-        // depnding on the tag, send
-        if (stat.MPI_TAG == READY) {
-            printf("get all the answers send a new partial solution to this %d\n", stat.MPI_SOURCE);
+    for(int i = 1; i < num_procs; i ++) {
+        if (partial_solns.empty()) {
+            break;
         }
-        else {
-            printf("only send a partial solution\n");
-        } 
-
+        MPI_Send(&partial_solns[partial_solns.size() - 1][0], n, MPI_UNSIGNED, i, SEND_TAG, MPI_COMM_WORLD);
+        partial_solns.pop_back();
     }
 
-    // terminate all processes
-    std::vector <unsigned int> dummy(n, n);
-    for(int i = 1; i < num_procs; i ++) {
+
+    // receive from the processor which is done and send to it
+    // expect to recieve at least something from counter number of processors
+    int new_counter = 0;
+    unsigned int sol_size;
+    std::vector <unsigned int> ans;
+    ans.resize(n);
+    while(new_counter != (num_procs - 1)) {
+
+        // first receive size from any source
+        MPI_Recv(&sol_size, 1, MPI_UNSIGNED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+
+        if (stat.MPI_TAG == NO_SOLUTION) {
+            // get the dummy solution
+            MPI_Recv(&ans[0], n, MPI_UNSIGNED, stat.MPI_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+
+            // give it a partial solution to work on 
+            if (partial_solns.empty()) {
+                new_counter ++;
+            } else {
+                MPI_Send(&partial_solns[partial_solns.size() -1][0], n, MPI_UNSIGNED, stat.MPI_SOURCE, SEND_TAG, MPI_COMM_WORLD);
+                partial_solns.pop_back();
+            }
+        } else {
+
+            // iteratively get the solutions from the source from which size was acquired
+            for(int i = 0; i < sol_size; i ++) {
+                MPI_Recv(&ans[0], n, MPI_UNSIGNED, stat.MPI_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+                solns.push_back(ans);
+            }
+
+            if (partial_solns.empty()) {
+                new_counter ++;
+            } else {
+                MPI_Send(&partial_solns[partial_solns.size() -1][0], n, MPI_UNSIGNED, stat.MPI_SOURCE, SEND_TAG, MPI_COMM_WORLD);
+                partial_solns.pop_back();
+            }
+        }
+    }
+ 
+    for(int i = 0; i < num_procs; i ++) {
         MPI_Send(&dummy[0], n, MPI_UNSIGNED, i, TERMINATE, MPI_COMM_WORLD);
     }
+
+    printf("%d\n", solns.size());
+    print_2D_vector(solns);
+
+
+
+    
 
     /******************* STEP 2: Send partial solutions to workers as they respond ********************/
     /*
@@ -217,11 +250,6 @@ void nqueen_master( unsigned int n,
      * Send a termination/kill signal to all workers.
      *
      */
-
-
-
-
-
 }
 
 void nqueen_worker( unsigned int n,
@@ -234,31 +262,50 @@ void nqueen_worker( unsigned int n,
 
     // Following is a general high level layout that you can follow (you are not obligated to design your solution in this manner. This is provided just for your ease).
 
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     //MPI_Request req;
     MPI_Status stat;
-
-    std::vector <unsigned int> partial_sol;
     std::vector <unsigned int> dummy(n, n);
-    partial_sol.resize(n);
+    unsigned int dummy_size = dummy.size();
+
+    unsigned int sol_size;
+
     while(true) {
         std::vector <std::vector <unsigned int> > completed_solns;
-        MPI_Recv(&partial_sol[0], n, MPI_UNSIGNED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
-        if (stat.MPI_TAG == SEND_TAG) {
-            solve_nqueens(partial_sol, completed_solns, exit_on_first, k, 0);
-            if (!completed_solns.empty())
-            {
-                MPI_Send(&completed_solns[0][0], n, MPI_UNSIGNED, 0, READY, MPI_COMM_WORLD);
-                print_2D_vector(completed_solns);
-            } 
-            else
-            {
-                MPI_Send(&dummy[0], n, MPI_UNSIGNED, 0, 444, MPI_COMM_WORLD);
-            }
-            
+        std::vector <unsigned int> partial_sol;
+        partial_sol.resize(n);
 
+        // receive partial solution from master
+        MPI_Recv(&partial_sol[0], n, MPI_UNSIGNED, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &stat);
+
+        if (stat.MPI_TAG == SEND_TAG) {
+
+            // solve the partial solution
+            solve_nqueens(partial_sol, completed_solns, exit_on_first, k);
+
+            if (!completed_solns.empty()) {
+                // if valid solutions found
+
+                // send the size of the valid solutions
+                sol_size = completed_solns.size();
+                MPI_Send(&sol_size, 1, MPI_UNSIGNED, 0, YES_SOLUTION, MPI_COMM_WORLD);
+
+                // iteratively send the individual solutions
+                for(int i = 0; i < sol_size; i ++) {
+                    MPI_Send(&completed_solns[i][0], n, MPI_UNSIGNED, 0, YES_SOLUTION, MPI_COMM_WORLD);
+                }
+
+            } else {
+                // send 1 as the size of the solution
+                MPI_Send(&dummy_size, 1, MPI_UNSIGNED, 0, NO_SOLUTION, MPI_COMM_WORLD);
+
+                // send the dummy solution
+                MPI_Send(&dummy[0], n, MPI_UNSIGNED, 0, NO_SOLUTION, MPI_COMM_WORLD);
+            }
         } else {
-            printf("terminating\n");
+            // printf("terminating\n");
             break;
         }
 

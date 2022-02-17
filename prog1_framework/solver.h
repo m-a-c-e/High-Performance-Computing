@@ -16,12 +16,15 @@
 
 # define TERMINATE 111
 # define READY     222
+# define NO_SOLUTION 333
+# define YES_SOLUTION 999
+# define SIZE_TAB 888
 
 // helper functions
 bool is_valid(std::vector <unsigned int> arr, int idx);
 void print_2D_vector(std::vector <std::vector <unsigned int>> solns);
 void print_1D_vector(std::vector <unsigned int> vec);
-void solve_nqueens( std::vector <unsigned int> arr, std::vector<std::vector<unsigned int> >& solns, bool exit_on_first, int idx, int start_value);
+void solve_nqueens( std::vector <unsigned int> arr, std::vector<std::vector<unsigned int> >& solns, bool exit_on_first, int idx);
 
 /************ Sequential solving function for nqueen*****************
  *

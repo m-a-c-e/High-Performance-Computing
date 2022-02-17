@@ -54,8 +54,11 @@ int main(int argc, char **argv) {
 
     if (num_procs==1) {
         // seq_solver(n, k, e, solns);
-        std::vector <unsigned int> arr (n, n);
-        solve_nqueens(arr, solns, e, 0, 0);
+        // print_2D_vector(solns);
+        // printf("size = %d\n", solns.size());
+        std::vector <unsigned int> arr = {7, 0, 0, 8};
+        solve_nqueens(arr, solns, e, 0);
+        printf("size = %d\n", solns.size());
         print_2D_vector(solns);
     }
     else {

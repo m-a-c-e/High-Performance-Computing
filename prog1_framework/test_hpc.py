@@ -36,13 +36,14 @@ def get_partial_sol_list(size, depth):
         while start_value < n: 
             arr[i] = start_value
             if is_valid(arr):
-                start_value = 0
-                flag        = True
                 if i == k - 1:
                     # a partial solution of size k is created here
                     # send it to any worker here
                     partial_sol.append(copy.deepcopy(arr))
-                    flag = False
+                    start_value += 1
+                    continue
+                start_value = 0
+                flag        = True
                 break
             else:
                 start_value += 1
@@ -55,7 +56,7 @@ def get_partial_sol_list(size, depth):
 
     return partial_sol
 
-ans = get_partial_sol_list(size=5, depth=4)
+ans = get_partial_sol_list(size=4, depth=2)
 #ans = is_valid([1, 2, 3, -1])
 print(ans)
 print(len(ans))

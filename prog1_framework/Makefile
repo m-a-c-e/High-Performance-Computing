@@ -3,10 +3,10 @@ CCFLAGS=-Wall -g
 # activate for compiler optimizations:
 #CCFLAGS=-Wall -O3
 LDFLAGS=
-PROCS=	2
-SIZE=	4
-DEPTH=	3
-EXIT=	1
+PROCS=	3
+SIZE=	6
+DEPTH=	2
+EXIT=	0
 
 all: nqueen
 
