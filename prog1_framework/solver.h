@@ -11,11 +11,17 @@
 #include <unistd.h>
 
 
+# define SEND_TAG  100
+# define RECV_TAG  101
+
+# define TERMINATE 111
+# define READY     222
 
 // helper functions
 bool is_valid(std::vector <unsigned int> arr, int idx);
 void print_2D_vector(std::vector <std::vector <unsigned int>> solns);
-void solve_nqueens( std::vector <unsigned int> arr, std::vector<std::vector<unsigned int> >& solns, bool exit_on_first, int idx);
+void print_1D_vector(std::vector <unsigned int> vec);
+void solve_nqueens( std::vector <unsigned int> arr, std::vector<std::vector<unsigned int> >& solns, bool exit_on_first, int idx, int start_value);
 
 /************ Sequential solving function for nqueen*****************
  *
