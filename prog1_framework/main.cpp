@@ -46,19 +46,16 @@ int main(int argc, char **argv) {
     MPI_Bcast(&e, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD);
 
     // vector containing solutions
-    std::vector< std::vector <int> > solns;
-    std::vector< std::vector <int> > new_solns;
+    std::vector< std::vector <unsigned int> > solns;
+    std::vector< std::vector <unsigned int> > new_solns;
 
     double time_elapsed=0.0;
     time_elapsed -= MPI_Wtime();
 
     if (num_procs==1) {
         // seq_solver(n, k, e, solns);
-        // std::vector <int> arr = {1, 3, -1, -1};
-        // solve_nqueens(arr, new_solns, false);
-        // print_2D_vector(solns);
-        // print_2D_vector(new_solns);
-        nqueen_master(n, k, false, solns);
+        std::vector <unsigned int> arr (n, n);
+        solve_nqueens(arr, solns, e, -1);
         print_2D_vector(solns);
     }
     else {

@@ -2,7 +2,7 @@
 
 
 /*************************** DECLARE YOUR HELPER FUNCTIONS HERE ************************/
-void print_2D_vector(std::vector <std::vector <int>> solns) {
+void print_2D_vector(std::vector <std::vector <unsigned int>> solns) {
     /*
         Prints a 2D vector
     */
@@ -16,24 +16,24 @@ void print_2D_vector(std::vector <std::vector <int>> solns) {
 }
 
 
-bool is_valid(std::vector <int> arr) {
+bool is_valid(std::vector <unsigned int> arr, int idx) {
     /*
         Checks if the input vector is a valid assignment
     */
     // Find the first occurance of -1 in arr
-    int idx = arr.size();
-    for(int i = 0; i < (int)arr.size(); i ++) {
-        if(arr[i] == -1) {
-            idx = i;
-            break;
-        }
-    }
+    // int idx = arr.size();
+    // for(int i = 0; i < (int)arr.size(); i ++) {
+    //     if(arr[i] == -1) {
+    //         idx = i;
+    //         break;
+    //     }
+    // }
 
-    if (idx == 0) {
-        return true;
-    } else {
-        idx --;     // represents the index of last assignment
-    }
+    // if (idx == 0) {
+    //     return true;
+    // } else {
+    //     idx --;     // represents the index of last assignment
+    // }
 
     // Check if the last assigned variable is consistent with
     // the ones assigned before it
@@ -50,10 +50,10 @@ bool is_valid(std::vector <int> arr) {
 /*************************** solver.h functions ************************/
 
 
-void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std::vector<std::vector<int> >& solns) {
+void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std::vector<std::vector<unsigned int> >& solns) {
 
     // TODO: Implement this function
-    std::vector <int> arr (n, -1);
+    std::vector <unsigned int> arr (n, n);
     int start_value = 0;
     bool flag       = false;
     int i           = 0;
@@ -61,12 +61,11 @@ void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std:
         flag = false;
         while(start_value < (int)n) {
             arr[i] = start_value;
-            if(is_valid(arr)) {
+            if(is_valid(arr, i)) {
                 start_value = 0;
                 flag        = true;
                 if (i == (int)k - 1) {
                     // a partial solution of size k is created here
-                    // send it to an idle worker
                     solns.push_back(arr);
                     if (exit_on_first) {
                         return;
@@ -89,39 +88,42 @@ void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std:
 
 }
 
+void solve_nqueens( std::vector <unsigned int> arr,
+                    std::vector<std::vector<unsigned int> >& solns,
+                    bool exit_on_first, int idx) {
+    /*
+        idx -> solved till this index
+    */
 
-void solve_nqueens( std::vector <int> arr,
-                    std::vector<std::vector<int> >& solns,
-                    bool exit_on_first) {
+
     // find the occurance of -1
-    int idx = arr.size();
-    for (int i = 0; i < (int)arr.size(); i ++) {
-        if (arr[i] == -1) {
-            idx = i;
-            break;
-        }
-    }
-    if (idx == (int)arr.size()) {
-        // cannot solve further
-        solns.push_back(arr);
-        return;
-    }
+    // int idx = arr.size();
+    // for (int i = 0; i < (int)arr.size(); i ++) {
+    //     if (arr[i] == -1) {
+    //         idx = i;
+    //         break;
+    //     }
+    // }
+    // if (idx == (int)arr.size()) {
+    //     // cannot solve further
+    //     solns.push_back(arr);
+    //     return;
+    // }
 
     // get all the solutions resulting from this partial solutions
     int start_value = 0;
     bool flag       = false;
     int i           = idx;
     int n           = (int)arr.size();
-    int k           = n;
 
-    while(i < (int)k && i >= 0) {
+    while(i < (int)n && i >= 0) {
         flag = false;
         while(start_value < (int)n) {
             arr[i] = start_value;
-            if(is_valid(arr)) {
+            if(is_valid(arr, i)) {
                 start_value = 0;
                 flag        = true;
-                if (i == (int)k - 1) {
+                if (i == (int)n - 1) {
                     // a partial solution of size k is created here
                     // send it to an idle worker
                     solns.push_back(arr);
@@ -146,28 +148,23 @@ void solve_nqueens( std::vector <int> arr,
 
 }
 
-
-
-
 void nqueen_master( unsigned int n,
                     unsigned int k,
                     unsigned int exit_on_first,
-                    std::vector<std::vector<int> >& solns) {
+                    std::vector<std::vector<unsigned int> >& solns) {
+    
 
     // Master makes an initial list of partial solutions
-    std::vector <std::vector <int> > partial_solns;
+    std::vector <std::vector <unsigned int> > partial_solns;
     seq_solver(n, k, exit_on_first, partial_solns);
-
-    for (int i = 0; i < (int)partial_solns.size(); i ++) {
-        solns.push_back(partial_solns[i]);
-    }
-    return; 
 
     // If we have to find one solution
     if (exit_on_first) {
         while (!partial_solns.empty())
         {
             // send partial solutions
+            MPI_Send(&partial_solns[0][0], n, MPI_UNSIGNED, 1, 4001, MPI_COMM_WORLD);
+            break;
             // try to receive solution
                 // break when one solution is received
         }
@@ -178,6 +175,8 @@ void nqueen_master( unsigned int n,
     // if we need to find all solutions 
     else {
         while(!partial_solns.empty()) {
+            MPI_Send(&partial_solns[0][0], n, MPI_UNSIGNED, 1, 4001, MPI_COMM_WORLD);
+            break;
             // send partial solutions to any processor 
             // try to receive solutions from processors who are finished
                 // append to solns
@@ -234,24 +233,35 @@ void nqueen_worker( unsigned int n,
 
     // Following is a general high level layout that you can follow (you are not obligated to design your solution in this manner. This is provided just for your ease).
 
-    /*******************************************************************
-     *
-     * while() {
-     *
-     *      wait for a message from master
-     *
-     *      if (message is a partial job) {
-     *              - finish the partial solution
-     *              - send all found solutions to master
-     *      }
-     *
-     *      if (message is a kill signal) {
-     *
-     *              quit
-     *
-     *      }
-     *  }
-     */
+    std::vector < std::vector<unsigned int> > completed_sols; 
+
+    std::vector <unsigned int> partial_sol{};
+    partial_sol.resize(n);
+
+    MPI_Status stat;
+    while(true) {
+        // Recieve a partial solution from master (blocking)
+        // which has been solved till depth k
+        MPI_Recv(&partial_sol[0], n, MPI_UNSIGNED, 0, 4001, MPI_COMM_WORLD, &stat);
+
+        // Get a vector containing all solutions
+        solve_nqueens(partial_sol, completed_sols, exit_on_first, k); 
+
+        // Send the solutions back to the master
+
+        print_2D_vector(completed_sols);
+
+
+        break;
+
+        /// wait for a message from master
+
+     
+        // if (message is a kill signal) {
+        
+                
+        // }
+    }
 
 
 }

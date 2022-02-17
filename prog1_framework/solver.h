@@ -13,9 +13,9 @@
 
 
 // helper functions
-bool is_valid(std::vector <int> arr);
-void print_2D_vector(std::vector <std::vector <int>> solns);
-void solve_nqueens( std::vector <int> arr, std::vector<std::vector<int> >& solns, bool exit_on_first);
+bool is_valid(std::vector <unsigned int> arr, int idx);
+void print_2D_vector(std::vector <std::vector <unsigned int>> solns);
+void solve_nqueens( std::vector <unsigned int> arr, std::vector<std::vector<unsigned int> >& solns, bool exit_on_first, int idx);
 
 /************ Sequential solving function for nqueen*****************
  *
@@ -27,7 +27,7 @@ void solve_nqueens( std::vector <int> arr, std::vector<std::vector<int> >& solns
  * all_solns: A vector of all solutions, each solution being an n sized vector.
  *
  * *****************************************************************/
-void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std::vector<std::vector<int> >& all_solns);
+void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std::vector<std::vector<unsigned int> >& all_solns);
 
 
 
@@ -48,7 +48,7 @@ void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std:
 void nqueen_master( unsigned int n,
                     unsigned int k,
                     unsigned int exit_on_first,
-                    std::vector<std::vector<int> >& all_solns);
+                    std::vector<std::vector<unsigned int> >& all_solns);
 
 
 

@@ -80,32 +80,53 @@ void nqueen_master( unsigned int n,
     }
 }
 
-int main(int argc, char *argv[]) {
-    // set up MPI
-    MPI_Init(&argc, &argv);
-    // get communicator size and my rank
-    MPI_Comm comm = MPI_COMM_WORLD;
-    int p, rank;
-    MPI_Comm_size(comm, &p);
-    MPI_Comm_rank(comm, &rank);
-    /* code */
-    int n = 8;
-    int k = 4;
-    std::vector<std::vector<unsigned int> > ans;
 
-    std::vector <int> a = {1, 3, 0, 2};
-    if (is_valid(a)) {
-        printf("works\n");
-    } else {
-        printf(":'(");
+int main(int argc, char* argv[]) {
+    std::vector <unsigned int> a{1, 2, 3};
+    std::vector <unsigned int> b = {};
+
+    while (!a.empty())
+    {
+        printf("%u\n", a[a.size() - 1]);
+        b.push_back(a[a.size()-1]);
+        printf("%u\n", b[b.size()-1]);
+        a.pop_back();
     }
 
-    std::vector <std::vector <int> > solns;
-    nqueen_master(5, 4, true, &solns);
-    print_2D_vector(solns);
+    while(!b.empty()) {
+        printf("%u\n", b[b.size()-1]);
+        b.pop_back();
+    }
+    
 
-    // finalize MPI
-    MPI_Finalize();
-
-    return 0;
 }
+
+// int main(int argc, char *argv[]) {
+//     // t up MPI
+//     MPI_Init(&argc, &argv);
+//     // get communicator size and my rank
+//     MPI_Comm comm = MPI_COMM_WORLD;
+//     int p, rank;
+//     MPI_Comm_size(comm, &p);
+//     MPI_Comm_rank(comm, &rank);
+//     /* code */
+//     int n = 8;
+//     int k = 4;
+//     std::vector<std::vector<unsigned int> > ans;
+
+//     std::vector <int> a = {1, 3, 0, 2};
+//     if (is_valid(a)) {
+//         printf("works\n");
+//     } else {
+//         printf(":'(");
+//     }
+
+//     std::vector <std::vector <int> > solns;
+//     nqueen_master(5, 4, true, &solns);
+//     print_2D_vector(solns);
+
+//     // finalize MPI
+//     MPI_Finalize();
+
+//     return 0;
+// }
