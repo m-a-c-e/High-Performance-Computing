@@ -1,17 +1,15 @@
 CXX=mpic++
-CCFLAGS=-Wall -g
-# activate for compiler optimizations:
-#CCFLAGS=-Wall -O3
+CCFLAGS=-Wall -g --std=c++17 -O3
 LDFLAGS=
-PROCS=	3
-SIZE=	6
+PROCS=	4
+SIZE=	4
 DEPTH=	2
-EXIT=	0
+EXIT=	1
 
 all: nqueen
 
 nqueen: main.o solver.o utils.o
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX) $(LDFLAGS) $(CCFLAGS) -o $@ $^
 
 %.o: %.cpp %.h
 	$(CXX) $(CCFLAGS) -c $<

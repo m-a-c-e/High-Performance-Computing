@@ -1,3 +1,9 @@
+/*
+    Author: Manan Patel
+    Problem: solve nQueens Problem using MPI
+*/
+
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -20,7 +26,6 @@ int main(int argc, char **argv) {
     // total number of procs in the world
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
-    //printf("rank = %d, processes = %d\n", proc_id, num_procs);
 
     // the board size and the size of partial soln to be computed by master
     unsigned int n,k,e;
@@ -47,19 +52,13 @@ int main(int argc, char **argv) {
 
     // vector containing solutions
     std::vector< std::vector <unsigned int> > solns;
-    std::vector< std::vector <unsigned int> > new_solns;
+
 
     double time_elapsed=0.0;
     time_elapsed -= MPI_Wtime();
 
     if (num_procs==1) {
-        // seq_solver(n, k, e, solns);
-        // print_2D_vector(solns);
-        // printf("size = %d\n", solns.size());
-        std::vector <unsigned int> arr = {7, 0, 0, 8};
-        solve_nqueens(arr, solns, e, 0);
-        printf("size = %d\n", solns.size());
-        print_2D_vector(solns);
+        seq_solver(n, e, solns);
     }
     else {
 
@@ -70,7 +69,10 @@ int main(int argc, char **argv) {
             nqueen_worker(n, k, e);
         }
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        if (!e) {
+            // synchronize all proceses
+            MPI_Barrier(MPI_COMM_WORLD);
+        }
     }
 
     time_elapsed += MPI_Wtime();
@@ -82,8 +84,18 @@ int main(int argc, char **argv) {
         write_output(out_file, time_elapsed, e, solns);
         out_file.close();
 
-        //std::cout << n << "\t" << num_procs << "\t" << k << "\t" << e << "\t" << time_elapsed << std::endl;
+        std::cout << n << "\t" << num_procs << "\t" << k << "\t" << e << "\t" << time_elapsed << std::endl;
+
+        // uncomment to see output
+        // printf("size = %lu\n", solns.size());
+        // print_2D_vector(solns);
+
+        if (e) {
+            // call abort only when one solution is required
+            MPI_Abort(MPI_COMM_WORLD, 0);
+        }
     }
+
 
     MPI_Finalize();
 

@@ -10,21 +10,28 @@
 #include <mpi.h>
 #include <unistd.h>
 
-
 # define SEND_TAG  100
-# define RECV_TAG  101
-
 # define TERMINATE 111
-# define READY     222
 # define NO_SOLUTION 333
 # define YES_SOLUTION 999
-# define SIZE_TAB 888
 
 // helper functions
 bool is_valid(std::vector <unsigned int> arr, int idx);
+
 void print_2D_vector(std::vector <std::vector <unsigned int>> solns);
+
 void print_1D_vector(std::vector <unsigned int> vec);
-void solve_nqueens( std::vector <unsigned int> arr, std::vector<std::vector<unsigned int> >& solns, bool exit_on_first, int idx);
+
+void solve_nqueens( std::vector <unsigned int> arr, 
+                    std::vector<std::vector<unsigned int> >& solns, 
+                    bool exit_on_first, 
+                    int idx);
+
+void partial_seq_solver( unsigned int n, 
+                         unsigned int k, 
+                         unsigned int exit_on_first, 
+                         std::vector<std::vector<unsigned int> >& all_solns);
+
 
 /************ Sequential solving function for nqueen*****************
  *
@@ -36,7 +43,7 @@ void solve_nqueens( std::vector <unsigned int> arr, std::vector<std::vector<unsi
  * all_solns: A vector of all solutions, each solution being an n sized vector.
  *
  * *****************************************************************/
-void seq_solver(unsigned int n, unsigned int k, unsigned int exit_on_first, std::vector<std::vector<unsigned int> >& all_solns);
+void seq_solver(unsigned int n, unsigned int exit_on_first, std::vector<std::vector<unsigned int> >& all_solns);
 
 
 
