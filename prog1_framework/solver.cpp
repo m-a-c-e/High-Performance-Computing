@@ -552,8 +552,9 @@ void nqueen_master( unsigned int n,
     std::vector <unsigned int> dummy(n, n);
 
 
-    // for all processes
+    int counter = 0;        // will track how many processors are actually working
 
+    // for all processes
     for(int i = 1; i < num_procs; i ++) {
 
         if (partial_solns.empty()) {
@@ -567,6 +568,8 @@ void nqueen_master( unsigned int n,
         MPI_Send(&partial_solns[partial_solns.size() - 1][0], n, MPI_UNSIGNED, i, SEND_TAG, MPI_COMM_WORLD);
 
         partial_solns.pop_back();
+
+        counter ++;
 
     }
 
@@ -584,7 +587,8 @@ void nqueen_master( unsigned int n,
 
     // while all the workers have not returned
 
-    while(new_counter != (num_procs - 1)) {
+//    while(new_counter != (num_procs - 1)) {
+    while(new_counter != counter) {
 
 
         // first receive size of solution from any source
