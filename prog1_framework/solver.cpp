@@ -263,6 +263,11 @@ void partial_seq_solver(unsigned int n,
 
     int i           = 0;
 
+    if (k == 0) {
+        solns.push_back(arr);
+        return;
+    }
+
 
     // for all indices less than depth
 
@@ -394,6 +399,11 @@ void solve_nqueens( std::vector <unsigned int> arr,
     int n           = (int) arr.size();
 
     int start_value = 0;
+
+    if (idx == n) {
+        solns.push_back(arr);
+        return;
+    }
 
 
     while(i < (int)n && i >= idx) {
@@ -530,7 +540,6 @@ void nqueen_master( unsigned int n,
 
     partial_seq_solver(n, k, 0, partial_solns);
 
-
     // get the MPI parameters
 
     int num_procs;
@@ -618,16 +627,6 @@ void nqueen_master( unsigned int n,
 
                 solns.push_back(ans);
 
-                if (exit_on_first)
-
-                {
-
-                    // if only one solution is required
-
-                    return;
-
-                }
-
             }
 
 
@@ -651,10 +650,12 @@ void nqueen_master( unsigned int n,
 
     }
 
- 
+    if (exit_on_first) {
+        // if only one solution is require
+        solns.resize(1);
+    }
 
     // send terminate signal via the tag terminate
-
     for(int i = 0; i < num_procs; i ++) {
 
         MPI_Send(&dummy[0], n, MPI_UNSIGNED, i, TERMINATE, MPI_COMM_WORLD);

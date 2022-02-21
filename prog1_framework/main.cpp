@@ -107,12 +107,9 @@ int main(int argc, char **argv) {
 
         }
 
-        if(!e) {
-            // synchronize all proceses
-            MPI_Barrier(MPI_COMM_WORLD);
-        }
+        MPI_Barrier(MPI_COMM_WORLD);
     }
-
+    print_2D_vector(solns);
 
     time_elapsed += MPI_Wtime();
 
@@ -138,15 +135,6 @@ int main(int argc, char **argv) {
         // printf("size = %lu\n", solns.size());
 
         // print_2D_vector(solns);
-
-
-        if (e) {
-
-            // call abort only when one solution is required
-
-            MPI_Abort(MPI_COMM_WORLD, 0);
-
-        }
 
     }
 

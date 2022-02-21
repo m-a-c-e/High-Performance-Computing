@@ -2,10 +2,10 @@ CXX=mpic++
 CCFLAGS=-Wall -g --std=c++17 -O3
 LDFLAGS=
 
-SIZE=	14
-PROCS=	8
-DEPTH=	4
-EXIT=	1
+SIZE=	5
+PROCS=	2
+DEPTH=	0
+EXIT=	0
 
 all: nqueen
 
